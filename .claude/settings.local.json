@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//private/tmp/**)",
+      "Bash(curl -sL --max-time 25 https://www.gustavo.fyi/ -o gustavo.html -w \"status=%{http_code} size=%{size_download}\\\\n\")",
+      "WebFetch(domain:www.gustavo.fyi)"
+    ]
+  }
+}

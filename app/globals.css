@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+  --color-page: #fafaf9;
+  --color-card: #ffffff;
+  --color-ink: #17181b;
+  --color-muted: #6a6d73;
+  --color-faint: #94969c;
+  --color-accent: #33507a;
+  --color-accent-strong: #263c5c;
+
+  --font-sans:
+    var(--font-figtree), -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --font-weight-title: 500;
+
+  --text-display: 1.875rem;
+  --text-display--line-height: 1.15;
+  --text-display--letter-spacing: -0.028em;
+
+  --text-body: 16px;
+  --text-body--line-height: 1.6;
+  --text-meta: 14px;
+  --text-meta--line-height: 1.55;
+  --text-foot: 13px;
+  --text-foot--line-height: 1.5;
+
+  --tracking-site: 0.01em;
+
+  --container-column: 584px;
+
+  --shadow-card:
+    0 1px 2px --alpha(var(--color-ink) / 5%), 0 5px 12px -4px --alpha(var(--color-ink) / 8%);
+  --shadow-lift:
+    0 2px 4px --alpha(var(--color-ink) / 6%), 0 14px 30px -10px --alpha(var(--color-ink) / 16%);
+  --shadow-shot:
+    0 1px 2px --alpha(var(--color-ink) / 6%), 0 6px 14px -6px --alpha(var(--color-ink) / 14%);
+
+  --breakpoint-wide: 640px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-page text-ink font-sans text-body font-normal tracking-site antialiased;
+  }
+
+  a {
+    @apply text-accent no-underline transition-colors duration-200 ease-out;
+  }
+
+  a:hover {
+    @apply text-accent-strong;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    a {
+      @apply transition-none;
+    }
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    @apply rounded-[3px] outline-2 outline-offset-[3px] outline-accent;
+  }
+}
