@@ -1,24 +1,16 @@
-import { ArrowUpRightIcon } from '@phosphor-icons/react/dist/ssr';
-import Image, { type StaticImageData } from 'next/image';
+import { ArrowUpRightIcon } from '@phosphor-icons/react/ssr';
+import Image from 'next/image';
 
-export type Project = {
-  name: string;
-  href: string;
-  logo: StaticImageData;
-  shot: StaticImageData;
-  shotAlt: string;
-  tint: string;
-  summary: string;
-};
+import type { Project } from '@/content/projects';
 
-const SHOT_SIZES = '(max-width: 719px) calc(100vw - 5.75rem), 240px';
+const SHOT_SIZES = '(min-width: 640px) 240px, calc(100vw - 6.75rem)';
 
-export function ProjectCard({ project }: { project: Project }) {
+export function ProjectCard({ project, eager = false }: { project: Project; eager?: boolean }) {
   return (
     <a
       href={project.href}
       target="_blank"
-      rel="noopener"
+      rel="noopener noreferrer"
       className="group flex h-full flex-col rounded-xl bg-card p-2.5 no-underline shadow-card transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lift motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       <div className={`overflow-hidden rounded-lg px-5 pt-5 ${project.tint}`}>
@@ -26,6 +18,8 @@ export function ProjectCard({ project }: { project: Project }) {
           src={project.shot}
           alt={project.shotAlt}
           sizes={SHOT_SIZES}
+          loading={eager ? 'eager' : 'lazy'}
+          fetchPriority={eager ? 'high' : 'auto'}
           className="aspect-[5/3] w-full rounded-t-md object-cover object-top shadow-shot"
         />
       </div>

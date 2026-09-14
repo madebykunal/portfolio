@@ -1,33 +1,8 @@
 import { Clock } from '@/components/clock';
 import { CopyMail } from '@/components/copy-mail';
-import { type Project, ProjectCard } from '@/components/project-card';
-import calxbookLogo from '@/public/calxbook.png';
-import calxbookShot from '@/public/calxbook-site.jpg';
-import calxmapLogo from '@/public/calxmap.png';
-import calxmapShot from '@/public/calxmap-site.png';
-
-const RESUME = '/kunal-singh-resume.pdf';
-
-const projects: Project[] = [
-  {
-    name: 'Calxbook',
-    href: 'https://calxbook.com',
-    logo: calxbookLogo,
-    shot: calxbookShot,
-    shotAlt: 'The Calxbook home page',
-    tint: 'bg-[#f9ded6]',
-    summary: 'Learn live from verified experts',
-  },
-  {
-    name: 'Calxmap',
-    href: 'https://calxmap.com',
-    logo: calxmapLogo,
-    shot: calxmapShot,
-    shotAlt: 'The Calxmap home page',
-    tint: 'bg-[#f3e0ee]',
-    summary: 'The expert marketplace platform',
-  },
-];
+import { ProjectCard } from '@/components/project-card';
+import { LINKS } from '@/content/profile';
+import { PROJECTS } from '@/content/projects';
 
 export default function Home() {
   return (
@@ -40,8 +15,8 @@ export default function Home() {
 
         <div className="space-y-3.5">
           <p>
-            Currently at <a href="https://calxmap.com">Calxmap</a>, where I design the product and
-            then build it — the interface, and the Node services behind it.
+            Currently at <a href={LINKS.calxmap}>Calxmap</a>, where I design the product and then
+            build it — the interface, and the Node services behind it.
           </p>
           <p>
             Self-taught, the long way round — documentation, a lot of R&amp;D, and a lot of
@@ -50,15 +25,15 @@ export default function Home() {
           <p>While being offline, I keep myself grounded with books and music.</p>
           <p>
             Reach me on <CopyMail />,{' '}
-            <a href="https://www.linkedin.com/in/madebykunal" target="_blank" rel="noopener">
+            <a href={LINKS.linkedin} target="_blank" rel="noopener noreferrer">
               LinkedIn
             </a>
             , or{' '}
-            <a href="https://github.com/madebykunal" target="_blank" rel="noopener">
+            <a href={LINKS.github} target="_blank" rel="noopener noreferrer">
               GitHub
             </a>
             . You can also read my{' '}
-            <a href={RESUME} target="_blank" rel="noopener">
+            <a href={LINKS.resume} target="_blank" rel="noopener noreferrer">
               résumé
             </a>
             .
@@ -68,9 +43,9 @@ export default function Home() {
 
       <section>
         <ul className="grid gap-3 wide:grid-cols-2">
-          {projects.map((project) => (
+          {PROJECTS.map((project, index) => (
             <li key={project.name}>
-              <ProjectCard project={project} />
+              <ProjectCard project={project} eager={index === 0} />
             </li>
           ))}
         </ul>

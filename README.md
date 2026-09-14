@@ -4,13 +4,16 @@ Personal site for Kunal Singh, built with the App Router.
 
 ## Stack
 
-| Piece      | Version | Notes                                        |
-| ---------- | ------- | -------------------------------------------- |
-| Next.js    | 16.3.4  | App Router, Turbopack (default bundler)      |
-| React      | 19.2.8  |                                              |
-| TypeScript | 7.0.2   | Go-native compiler                           |
-| Tailwind   | 4.3.3   | CSS-first, via `@tailwindcss/webpack` loader |
-| Biome      | 2.5.12  | Lint + format                                |
+| Piece      | Version | Notes                                       |
+| ---------- | ------- | ------------------------------------------- |
+| Next.js    | 16.3.5  | App Router, Turbopack (default bundler)     |
+| React      | 19.3.0  |                                             |
+| TypeScript | 7.0.2   | Go-native compiler                          |
+| Tailwind   | 4.3.3   | CSS-first, via `@tailwindcss/postcss`       |
+| Biome      | 2.5.13  | Lint + format                               |
+
+Every dependency is pinned to an exact version — no `^` ranges — so a clean
+install reproduces the build that was tested.
 
 ## Commands
 
@@ -23,36 +26,30 @@ npm run format     # biome check --write
 npm run typecheck  # tsc --noEmit
 ```
 
-## No PostCSS config
+## PostCSS
 
-The usual Tailwind + Next.js setup needs a `postcss.config.mjs` holding the
-`@tailwindcss/postcss` plugin. This project doesn't have one.
+Tailwind is wired the way the Next.js 16 docs prescribe — `@tailwindcss/postcss`
+in a four-line `postcss.config.mjs`:
 
-Instead, `next.config.ts` registers Tailwind's loader as a Turbopack rule:
-
-```ts
-turbopack: {
-  rules: {
-    '*.css': {
-      condition: { not: 'foreign' },
-      loaders: ['@tailwindcss/webpack'],
-      type: 'css',
-    },
+```js
+export default {
+  plugins: {
+    '@tailwindcss/postcss': {},
   },
-}
+};
 ```
 
-`@tailwindcss/webpack` (added in Tailwind 4.2) compiles `@import "tailwindcss"`
-in place, and `type: 'css'` — a Turbopack rule option added in Next.js 16.2 —
-hands the result back to Turbopack's built-in CSS pipeline. PostCSS is never
-involved, so no `postcss.config.*` and no `postcss` dependency.
-
-`condition: { not: 'foreign' }` keeps the loader off `node_modules`.
+This replaced an earlier setup that registered `@tailwindcss/webpack` as a
+Turbopack `rules` entry in `next.config.ts` to avoid a PostCSS config
+altogether. That worked, but it traded four lines of standard config for nine
+lines of non-standard config plus a loader whose interaction with Turbopack's
+built-in CSS pipeline is not a documented combination. The supported path is
+cheaper to keep working across upgrades.
 
 ## Configuration
 
-There is no `tailwind.config.js` either — Tailwind v4 is CSS-first. Design
-tokens live in the `@theme` block in `app/globals.css`, which is what generates
+There is no `tailwind.config.js` — Tailwind v4 is CSS-first. Design
+tokens live in the `@theme` block in `src/app/globals.css`, which is what generates
 the `bg-page`, `text-ink`, `text-muted`, `text-faint`, `text-accent`,
 `text-accent-strong`, `max-w-column`, `text-display`, `text-body` and `wide:`
 utilities used throughout.
@@ -81,26 +78,45 @@ without a side-by-side TS 6 install. Biome is one of the linters
 
 ## Layout
 
-The site is a single page. `app/` holds routes only; shared components live
-alongside it and are imported through the `@/` alias.
+The site is a single page. Application code sits under `src/`, leaving the
+repository root to configuration alone; `src/app/` holds routes only, and
+everything else is imported through the `@/` alias, which maps to `src/`.
 
 ```
-app/
-  layout.tsx              root layout, Figtree + JetBrains Mono, the centred column
-  page.tsx                the whole site
-  globals.css             @theme tokens, base layer
-  icon.svg                favicon
-components/
-  project-card.tsx        one work card — shot, mark, name, summary
-  clock.tsx               IST clock
-  copy-mail.tsx           "mail me" button + copy-to-clipboard (Phosphor icons)
+src/
+  app/
+    layout.tsx            root layout, Figtree + JetBrains Mono, the centred column
+    page.tsx              the whole site
+    globals.css           @theme tokens, base layer
+    icon.svg              favicon
+  components/
+    project-card.tsx      one work card — shot, mark, name, summary
+    clock.tsx             IST clock
+    copy-mail.tsx         "mail me" button + copy-to-clipboard (Phosphor icons)
+  content/
+    profile.ts            address and outbound links
+    projects.ts           the Project type and the two cards' data
+  assets/
+    calxbook-logo.png     favicon from calxbook.com
+    calxmap-logo.png      calxmap.com logo, cropped to the circular mark
+    calxbook-shot.jpg     card thumbnail, 1160×693
+    calxmap-shot.jpg      card thumbnail, 1160×693
+  lib/
+    security-headers.ts   the header list next.config.ts serves
 public/
-  calxbook.png            favicon from calxbook.com
-  calxmap.png             calxmap.com logo, cropped to the circular mark
-  calxbook-site.jpg       card thumbnail, 5:3
-  calxmap-site.png        card thumbnail, 5:3
   kunal-singh-resume.pdf  linked from Contact — not checked in yet
 ```
+
+`content/` exists so `page.tsx` reads as layout rather than as layout mixed with
+data. It is split in two because `profile.ts` is the only half a Client
+Component needs — `copy-mail.tsx` imports the address from it, and keeping the
+image imports in `projects.ts` keeps them out of that import graph.
+
+The four images moved out of `public/` and into `src/assets/`. `public/` serves
+files verbatim at a stable URL, which is what the résumé needs; these four are
+imported, so Next fingerprints them, reads their intrinsic size at build time
+and re-encodes them per request. Sitting in `public/` they were also reachable
+at a second, unoptimised URL.
 
 One centred 620px column, no section labels and no left gutter — the name and
 designation sit directly above the content, everything flush to the same left
@@ -126,12 +142,67 @@ A card is just the shot, the mark, the name and a one-line summary. `h-full` on
 the anchor keeps the pair the same height when one summary wraps and the other
 doesn't.
 
+## Images
+
+The Calxbook thumbnail is the Largest Contentful Paint element, so its card is
+rendered with `eager`, which sets `loading="eager"` and `fetchPriority="high"`.
+The default is `loading="lazy"`, which defers the LCP element behind the
+viewport calculation and is what Next.js warns about in development. `priority`
+is *not* used: it was deprecated in Next.js 16 in favour of `preload`, and the
+docs point to `loading`/`fetchPriority` ahead of `preload` in exactly this case.
+
+Both thumbnails are 1160×693 JPEGs. The Calxmap one was a 2880×1720 PNG at
+861KB — a 2× screen capture, carrying an alpha channel that was fully opaque on
+every pixel. Neither the resolution nor the alpha was reachable: the card paints
+at 240px wide in two columns and at most ~322px on a phone, so ~1000px covers a
+3× display, and a JPEG on an opaque image loses nothing. Re-encoded at quality
+90 with `4:4:4` chroma it is 84KB, a 90% cut. Subsampling stays off because the
+image is a UI screenshot, where `4:2:0` fringes coloured text; the 16KB that
+costs is worth it in a source asset.
+
+`sizes` is `(min-width: 640px) 240px, calc(100vw - 6.75rem)`. The breakpoint has
+to be 640px because that is `--breakpoint-wide`, where the grid becomes two
+columns and a card halves in width. It previously read `(max-width: 719px)`, so
+between 640px and 719px the browser was told the card was full-bleed while it
+was actually about 226px, and it fetched the 640w candidate for a quarter of the
+pixels.
+
+## Security
+
+Response headers are set for every path from `src/lib/security-headers.ts`:
+a Content Security Policy, `Strict-Transport-Security`,
+`Referrer-Policy: strict-origin-when-cross-origin`, `X-Content-Type-Options:
+nosniff` and a `Permissions-Policy` that denies camera, microphone, geolocation
+and Topics. `poweredByHeader: false` drops `X-Powered-By`. Outbound links carry
+`rel="noopener noreferrer"`, so the destination is not handed the referring URL.
+
+The CSP is dev-aware — `'unsafe-eval'` and `ws:` are added under `next dev`,
+where React evaluates code to reconstruct server stack traces and HMR needs a
+socket, and `upgrade-insecure-requests` is omitted so localhost still works.
+
+`script-src` has to include `'unsafe-inline'`. A statically prerendered page
+carries React's hydration payload in inline `<script>` tags, and the nonce that
+would replace it can only be generated per request, which means opting the page
+into dynamic rendering. Trading static generation for a stricter CSP is a bad
+deal for a page with no user input, no forms and no third-party scripts beyond
+Vercel Analytics. The policy still does the useful part: it confines scripts,
+styles, images, fonts and connections to this origin, blocks framing, and blocks
+`<object>` and `<base>` outright.
+
+What the CSP cannot do is hide the page. Everything this site renders — the
+markup, the stylesheet, the email address, the résumé URL — is public by
+construction and readable in DevTools. There is nothing else to leak: the site
+has no API, no database, no authentication, and no environment variables reach
+the client. Production builds ship no source maps (Next.js omits them unless
+`productionBrowserSourceMaps` is set), so the bundle is minified and the
+original TypeScript is not reconstructable from it.
+
 ## Notes
 
 The source carries no comments by request. Two things that would otherwise be
 worth a comment:
 
-- `app/icon.svg` is parsed as XML, so its markup must be well formed. In
+- `src/app/icon.svg` is parsed as XML, so its markup must be well formed. In
   particular an XML comment may never contain a double hyphen — one there
   silently breaks the whole favicon.
 - Tailwind v4 scans raw source text for class candidates, so any class name
@@ -139,6 +210,24 @@ worth a comment:
   comments dropped three dead rules from the stylesheet.
 
 `Clock` re-renders on a timer aligned to the next minute boundary rather than
-every second, since it only ever displays hours and minutes.
+every second, since it only ever displays hours and minutes. It renders a
+`--:-- --` placeholder until its effect runs, so the server and client markup
+agree and the timer never starts on the server.
+
+Both Client Components own a timer and both clear it — `Clock` in its effect
+cleanup, `CopyMail` from a ref — so neither survives unmount.
+
+`CopyMail` used to fall back to `document.execCommand('copy')` behind a hidden
+`<textarea>` when the async Clipboard API was unavailable. That path is gone:
+`execCommand` is deprecated, the Clipboard API is available in every browser
+this site targets, and `localhost` counts as a secure context, so the fallback
+was only reachable on a plain-HTTP deployment. A failed copy still reports the
+address through the live region rather than failing silently.
+
+Phosphor icons are imported from `@phosphor-icons/react/ssr` in both components,
+including the Client Component. The default entry point carries a context
+provider for inherited icon styling that this site never uses; the `/ssr` entry
+is a plain `forwardRef` around an `<svg>`, with no hooks and no context, so it
+costs nothing on the client.
 
 `AGENTS.md` and `CLAUDE.md` are generated by `next dev` and are safe to commit.
