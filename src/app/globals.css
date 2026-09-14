@@ -41,12 +41,31 @@
 }
 
 @layer base {
+  :root {
+    --cursor-crosshair: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='%2333507a' stroke='%23fafaf9' stroke-width='2' paint-order='stroke'><rect x='11' y='3' width='2' height='5'/><rect x='11' y='16' width='2' height='5'/><rect x='3' y='11' width='5' height='2'/><rect x='16' y='11' width='5' height='2'/></svg>");
+    --cursor-target: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='%2333507a' stroke='%23fafaf9' stroke-width='2' paint-order='stroke'><rect x='11' y='3' width='2' height='5'/><rect x='11' y='16' width='2' height='5'/><rect x='3' y='11' width='5' height='2'/><rect x='16' y='11' width='5' height='2'/><rect x='11' y='11' width='2' height='2'/></svg>");
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
   }
 
+  ::selection {
+    @apply bg-accent/20 text-ink;
+  }
+
   body {
     @apply bg-page text-ink font-sans text-body font-normal tracking-site antialiased;
+    cursor:
+      var(--cursor-crosshair) 12 12,
+      crosshair;
+  }
+
+  a,
+  button {
+    cursor:
+      var(--cursor-target) 12 12,
+      pointer;
   }
 
   a {

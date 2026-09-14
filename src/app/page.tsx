@@ -15,12 +15,12 @@ export default function Home() {
 
         <div className="space-y-3.5">
           <p>
-            Currently at <a href={LINKS.calxmap}>Calxmap</a>, where I design the product and then
-            build it — the interface, and the Node services behind it.
+            I work at <a href={LINKS.calxmap}>@Calxmap</a> where I started as an intern designing
+            products and now lead design while supporting the engineering team with frontend.
           </p>
           <p>
-            Self-taught, the long way round — documentation, a lot of R&amp;D, and a lot of
-            rebuilding. Right now I&apos;m learning Rust.
+            Built through documentation, research, and relentless iteration. Now focusing on Rust to
+            build efficient backend systems.
           </p>
           <p>While being offline, I keep myself grounded with books and music.</p>
           <p>

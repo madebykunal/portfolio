@@ -36,7 +36,7 @@ export function CopyMail() {
         onClick={copy}
         title={`Copy ${MAIL}`}
         aria-label={`Copy email address, ${MAIL}`}
-        className="ml-0.5 cursor-pointer align-[-0.15em] text-faint transition-colors duration-200 ease-out hover:text-accent motion-reduce:transition-none"
+        className="ml-0.5 align-[-0.15em] text-faint transition-colors duration-200 ease-out hover:text-accent motion-reduce:transition-none"
       >
         {state === 'copied' ? (
           <CheckIcon size={14} aria-hidden="true" className="text-accent" />
