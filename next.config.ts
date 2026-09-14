@@ -1,19 +1,18 @@
 import type { NextConfig } from 'next';
 
+import { securityHeaders } from './src/lib/security-headers';
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   experimental: {
     optimizePackageImports: ['@phosphor-icons/react'],
   },
-  turbopack: {
-    rules: {
-      '*.css': {
-        condition: { not: 'foreign' },
-        loaders: ['@tailwindcss/webpack'],
-        type: 'css',
-      },
+  headers: async () => [
+    {
+      source: '/:path*',
+      headers: securityHeaders(process.env.NODE_ENV === 'development'),
     },
-  },
+  ],
 };
 
 export default nextConfig;

@@ -28,7 +28,9 @@ export function Clock() {
     return () => clearTimeout(timer);
   }, []);
 
-  return (
-    <time dateTime={now ? now.toISOString() : ''}>{now ? timeFormat.format(now) : '--:-- --'}</time>
-  );
+  if (!now) {
+    return <time>--:-- --</time>;
+  }
+
+  return <time dateTime={now.toISOString()}>{timeFormat.format(now)}</time>;
 }
