@@ -167,6 +167,44 @@ between 640px and 719px the browser was told the card was full-bleed while it
 was actually about 226px, and it fetched the 640w candidate for a quarter of the
 pixels.
 
+## Selection and cursor
+
+`::selection` is the accent at 20% alpha with the text left at `--color-ink`,
+rather than a solid accent fill with reversed-out text. A solid `#33507a` behind
+a whole selected paragraph is a lot of dark blue on a page this light, and it
+forces every selected glyph to change colour. The wash reads as brand without
+restyling the type, and it matches what the OS already does — macOS selection is
+a light tint, not an inversion. 20% lands the selected ground at roughly
+`#d2d8e0`, clearly separated from the `#fafaf9` page while keeping ink on it at
+about 13:1.
+
+The cursor is a Valorant-style crosshair: four 2×5px ticks around a 4px centre
+gap, on a 24px canvas with the hotspot at `12 12`. Links and buttons get the
+same crosshair with a centre dot added — the gap closing on a target is
+Valorant's own idiom for "on it", so the interactive state is a variant of the
+cursor rather than an unrelated second icon.
+
+Valorant's form, this site's colour: the crosshair is `--color-accent`, not
+Valorant's green, which would be the only saturated thing on the page. Each tick
+carries a 1px `--color-page` halo via `paint-order: stroke`, so the fill stays a
+full 2px and the halo sits behind it. The halo is invisible against the page and
+only does work over the dark regions of the card screenshots, where an unhaloed
+accent-blue crosshair disappears.
+
+Both crosshairs are inline `data:` SVGs held in custom properties at the top of
+the base layer. Inline rather than files in `public/` so there is no request and
+no flash of the fallback cursor before the image arrives; `img-src` in the CSP
+already allows `data:`. The trade-off is that `#33507a` and `#fafaf9` are
+hardcoded in the two URIs — a data URI is an opaque string, so `var()` cannot
+reach inside it. **Changing `--color-accent` or `--color-page` means changing
+them in the cursors too.**
+
+Every `cursor` declaration ends in a real keyword — `crosshair` and `pointer` —
+so a browser that refuses the SVG still gets sensible behaviour. Note that this
+replaces the I-beam over prose: text is still selectable, but the cursor no
+longer advertises it. `body { cursor: text }` on the prose column would put it
+back if that trade reads wrong in use.
+
 ## Security
 
 Response headers are set for every path from `src/lib/security-headers.ts`:

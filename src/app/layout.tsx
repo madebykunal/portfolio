@@ -20,7 +20,7 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Kunal Singh',
   description:
-    'Kunal Singh is a self-taught product designer and engineer at Calxmap, where he designed Calxmap and Calxbook end to end and built the Calxbook frontend.',
+    'Kunal Singh is a product designer and engineer at Calxmap, where he leads design and supports the engineering team with frontend work.',
 };
 
 export const viewport: Viewport = {
